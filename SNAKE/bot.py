@@ -1,4 +1,4 @@
-from snake import App, RLSnake as Snake
+from snake import App, Snake
 import random
 import threading
 import time
@@ -50,15 +50,15 @@ def main():
         '''  Thread that sends a move to the snake game '''
         while Info.ongoing:
             if Info.snake.ongoing:
-                if len(Info.snake.movequeue) == 0:
-                    # If there are no moves queued, the snake game
-                    # is at the most updated state
-                    time.sleep(1 / 10.) # For some reason, sleeping it makes
-                                     # the gui run faster
-                    reward = Info.snake.submitMove(astar())
-                    sys.stdout.write('%d (+%d)    \r' % (Info.score, reward))
-                    sys.stdout.flush()
-                    Info.score += reward
+                # If there are no moves queued, the snake game
+                # is at the most updated state
+                time.sleep(1 / 10.) # For some reason, sleeping it makes
+                                 # the gui run faster
+                action = astar()
+                reward = Info.snake.submitMove(action)
+                # sys.stdout.write('%s   \r' % (action))
+                # sys.stdout.flush()
+                Info.score += reward
             else:
                 # The game is over. Wait some time and then
                 # reset the game
@@ -71,7 +71,7 @@ def main():
     def chooseMove():
         ''' Chooses a move. Naively heads to the horizontal coordinate,
         then the vertical coordinate. '''
-        head = Info.snake.head
+        head = Info.snake.head()
         apple = Info.snake.apple
         if head[0] > apple[0]:
             return Snake.LEFT
@@ -90,7 +90,7 @@ def main():
         def dist((x1, y1), (x2, y2)):
             return abs(x1 - x2) + abs(y1 - y2)
 
-        start = Info.snake.head
+        start = Info.snake.head()
         goal = Info.snake.apple
         best = (999999, None)
         for action in Snake.ACTIONS:
@@ -108,7 +108,7 @@ def main():
         def dist((x1, y1), (x2, y2)):
             return abs(x1 - x2) + abs(y1 - y2)
 
-        start = Info.snake.head
+        start = Info.snake.head()
         goal = Info.snake.apple
 
         parents = dict()
@@ -127,6 +127,7 @@ def main():
                 return action
 
             # Adds neighbors to the queue
+            # TODO: Apple in snake gets stuck in astar
             for action in Snake.ACTIONS:
                 neighbor = Info.snake.pollAction(curr, action)
                 if Info.snake.isEmpty(neighbor) and \

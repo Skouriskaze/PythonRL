@@ -40,7 +40,15 @@ class Snake:
         self.height = height
         self.newGame()
 
-        self.rects = []
+
+    def isEmpty(self, state):
+        return not (state in self.body() or self.isOffscreen(state))
+
+    def isOffscreen(self, state):
+        return self.head()[0] < 0 or \
+               self.head()[1] < 0 or \
+               self.head()[0] >= self.width or \
+               self.head()[1] >= self.height
  
     def newGame(self): 
         ''' Setting a game up. ''' 
@@ -79,16 +87,20 @@ class Snake:
         if self.ongoing:
             self.move(action)
             self.transition()
-            self.update()
+            return self.update()
         else:
             self.newGame()
+            return 0
 
+    def pollAction(self, state, action):
+        dx, dy = Snake.DMAP[action]
+        return (state[0] + dx, state[1] + dy)
 
     def update(self):
         ''' Updates the game. Moves the snake and then checks for status changes
         like game over or picked up apple. '''
         # Check Collision
-        if self.head() in self.snake[:-1]:
+        if self.head() in self.body():
             self.ongoing = False
             return -10
 
@@ -116,99 +128,97 @@ class Snake:
         return self.snake[:-1]
 
 
-class Snake:
-    '''
-    A snake game.
-    '''
-
-    '''
-    These are the actions the snake can take.
-    The NOOP is to create a new game.
-    DMAP maps actions to respective dx and dy.
-    '''
-    LEFT = 0
-    UP = 1
-    RIGHT = 2
-    DOWN = 3
-    NOOP = -1
-    ACTIONS = [NOOP, LEFT, UP, RIGHT, DOWN]
-    DMAP = {}
-    DMAP[LEFT] = (-1, 0)
-    DMAP[UP] = (0, -1)
-    DMAP[RIGHT] = (1, 0)
-    DMAP[DOWN] = (0, 1)
-    DMAP[NOOP] = (0, 0)
-
-    def __init__(self, width, height):
-        ''' Create a snake game with set width and height '''
-        self.width = width 
-        self.height = height
-        self.newGame()
-
-        self.rects = []
- 
-    def newGame(self): 
-        ''' Setting a game up. ''' 
-        self.length = 1
-        self.snake = [(self.height / 2, self.width / 2)]
-        self.snake = [self.genApple()]
-        self.apple = self.genApple()
-
-        self.dx = 0
-        self.dy = 0
-
-        self.ongoing = True
-
-    def genApple(self):
-        ''' Just generates a random (x, y) pair. '''
-        apple = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-        return apple
-
-
-    def update(self):
-        ''' Updates the game. Moves the snake and then checks for status changes
-        like game over or picked up apple. '''
-        if self.ongoing:
-            # Move
-            self.transition()
-            
-            # Check Collision
-            if self.head() in self.snake[:-1]:
-                self.ongoing = False
-                return False
-
-            # Check Offscreen
-            if self.head()[0] < 0 or self.head()[1] < 0 or self.head()[0] >= self.width or self.head()[1] >= self.height:
-                    self.ongoing = False
-                    return False
-
-            # Check Apple
-            if self.head() == self.apple:
-                self.length += 1
-                self.apple = self.genApple()
-            return True
-        else:
-            if self.dx == 0 and self.dy == 0:
-                self.newGame()
-
-    def head(self):
-        ''' Get the head of the snake '''
-        return self.snake[-1]
-
-    def move(self, action):
-        ''' Sets the dx and dy of the snake, and then updates the game. '''
-        dx, dy = Snake.DMAP[action]
-        self.dx = dx
-        self.dy = dy
-        self.update()
-
-    def transition(self):
-        ''' Moves the snake. '''
-        headx, heady = self.snake[-1]
-        self.snake.append((headx + self.dx, heady + self.dy))
-
-        while len(self.snake) > self.length:
-            self.snake.pop(0)
+# class Snake:
+    # '''
+    # A snake game.
+    # '''
+# 
+    # '''
+    # These are the actions the snake can take.
+    # The NOOP is to create a new game.
+    # DMAP maps actions to respective dx and dy.
+    # '''
+    # LEFT = 0
+    # UP = 1
+    # RIGHT = 2
+    # DOWN = 3
+    # NOOP = -1
+    # ACTIONS = [NOOP, LEFT, UP, RIGHT, DOWN]
+    # DMAP = {}
+    # DMAP[LEFT] = (-1, 0)
+    # DMAP[UP] = (0, -1)
+    # DMAP[RIGHT] = (1, 0)
+    # DMAP[DOWN] = (0, 1)
+    # DMAP[NOOP] = (0, 0)
+# 
+    # def __init__(self, width, height):
+        # ''' Create a snake game with set width and height '''
+        # self.width = width 
+        # self.height = height
+        # self.newGame()
+ # 
+    # def newGame(self): 
+        # ''' Setting a game up. ''' 
+        # self.length = 1
+        # self.snake = [(self.height / 2, self.width / 2)]
+        # self.snake = [self.genApple()]
+        # self.apple = self.genApple()
+# 
+        # self.dx = 0
+        # self.dy = 0
+# 
+        # self.ongoing = True
+# 
+    # def genApple(self):
+        # ''' Just generates a random (x, y) pair. '''
+        # apple = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+        # return apple
+# 
+# 
+    # def update(self):
+        # ''' Updates the game. Moves the snake and then checks for status changes
+        # like game over or picked up apple. '''
+        # if self.ongoing:
+            # # Move
+            # self.transition()
+            # 
+            # # Check Collision
+            # if self.head() in self.body():
+                # self.ongoing = False
+                # return False
+# 
+            # # Check Offscreen
+            # if self.head()[0] < 0 or self.head()[1] < 0 or self.head()[0] >= self.width or self.head()[1] >= self.height:
+                    # self.ongoing = False
+                    # return False
+# 
+            # # Check Apple
+            # if self.head() == self.apple:
+                # self.length += 1
+                # self.apple = self.genApple()
+            # return True
+        # else:
+            # if self.dx == 0 and self.dy == 0:
+                # self.newGame()
+# 
+    # def head(self):
+        # ''' Get the head of the snake '''
+        # return self.snake[-1]
+# 
+    # def move(self, action):
+        # ''' Sets the dx and dy of the snake, and then updates the game. '''
+        # dx, dy = Snake.DMAP[action]
+        # self.dx = dx
+        # self.dy = dy
+        # self.update()
+# 
+    # def transition(self):
+        # ''' Moves the snake. '''
+        # headx, heady = self.snake[-1]
+        # self.snake.append((headx + self.dx, heady + self.dy))
+# 
+        # while len(self.snake) > self.length:
+            # self.snake.pop(0)
 
 
 class App:
@@ -240,34 +250,27 @@ class App:
         self.head = self.game.head()
         self.root.bind("<KeyPress>", self._keydown)
 
-        self.queuemove = queue
-
     def _keydown(self, e):
         ''' Keyboard event handler. '''
         if e.keycode == 113 or e.keycode == 37:
-            self.queuemove.append(Snake.LEFT)
-            # self.game.move(Snake.LEFT)
+            # self.queuemove.append(Snake.LEFT)
+            self.game.submitMove(Snake.LEFT)
         elif e.keycode == 114 or e.keycode == 39:
-            self.queuemove.append(Snake.RIGHT)
-            # self.game.move(Snake.RIGHT)
+            # self.queuemove.append(Snake.RIGHT)
+            self.game.submitMove(Snake.RIGHT)
         elif e.keycode == 111 or e.keycode == 38:
-            self.queuemove.append(Snake.UP)
-            # self.game.move(Snake.UP)
+            # self.queuemove.append(Snake.UP)
+            self.game.submitMove(Snake.UP)
         elif e.keycode == 116 or e.keycode == 40:
-            self.queuemove.append(Snake.DOWN)
-            # self.game.move(Snake.DOWN)
+            # self.queuemove.append(Snake.DOWN)
+            self.game.submitMove(Snake.DOWN)
 
         elif e.keycode == 65:
             if not self.game.ongoing:
                 self.game.newGame()
-                self.queuemove.append(Snake.NOOP)
 
     def loop(self):
         ''' Updates and renders the snake game. '''
-        # Grabbing move from queue
-        if len(self.queuemove) > 0:
-            self.game.move(self.queuemove.pop(0))
-
         # Updating
         # Rendering
         self.drawSnake()
