@@ -26,7 +26,7 @@ class Snake:
     RIGHT = 2
     DOWN = 3
     NOOP = -1
-    ACTIONS = [NOOP, LEFT, UP, RIGHT, DOWN]
+    ACTIONS = [LEFT, UP, RIGHT, DOWN]
     DMAP = {}
     DMAP[LEFT] = (-1, 0)
     DMAP[UP] = (0, -1)
@@ -40,21 +40,24 @@ class Snake:
         self.height = height
         self.newGame()
 
+    @staticmethod
+    def randomAction():
+        return Snake.ACTIONS[random.randint(0, len(Snake.ACTIONS) - 1)]
 
     def isEmpty(self, state):
-        return not (state in self.body() or self.isOffscreen(state))
+        return not(state in self.body() or self.isOffscreen(state))
 
     def isOffscreen(self, state):
-        return self.head()[0] < 0 or \
-               self.head()[1] < 0 or \
-               self.head()[0] >= self.width or \
-               self.head()[1] >= self.height
+        return state[0] < 0 or \
+               state[1] < 0 or \
+               state[0] >= self.width or \
+               state[1] >= self.height
  
     def newGame(self): 
         ''' Setting a game up. ''' 
         self.length = 1
         self.snake = [(self.height / 2, self.width / 2)]
-        self.snake = [self.genApple()]
+        self.snake = [self.randomLocation()]
         self.apple = self.genApple()
 
         self.dx = 0
@@ -62,9 +65,17 @@ class Snake:
 
         self.ongoing = True
 
-    def genApple(self):
+        return 0, self.head()
+
+    def randomLocation(self):
         ''' Just generates a random (x, y) pair. '''
-        apple = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+        loc = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+        return loc
+
+    def genApple(self):
+        apple = self.randomLocation()
+        while not self.isEmpty(apple):
+            apple = self.randomLocation()
         return apple
 
 
@@ -89,8 +100,7 @@ class Snake:
             self.transition()
             return self.update()
         else:
-            self.newGame()
-            return 0
+            return self.newGame()
 
     def pollAction(self, state, action):
         dx, dy = Snake.DMAP[action]
@@ -102,124 +112,26 @@ class Snake:
         # Check Collision
         if self.head() in self.body():
             self.ongoing = False
-            return -10
+            return -10, self.head()
 
         # Check Offscreen
-        if self.head()[0] < 0 or \
-                self.head()[1] < 0 or \
-                self.head()[0] >= self.width or \
-                self.head()[1] >= self.height:
-                self.ongoing = False
-                return -10
+        if self.isOffscreen(self.head()):
+            self.ongoing = False
+            return -10, self.head()
 
         # Check Apple
         if self.head() == self.apple:
             self.length += 1
             self.apple = self.genApple()
-            return 10
+            return 10, self.head()
 
-        return 1
+        return 1, self.head()
 
-        
     def head(self):
         ''' Get the head of the snake '''
         return self.snake[-1]
     def body(self):
         return self.snake[:-1]
-
-
-# class Snake:
-    # '''
-    # A snake game.
-    # '''
-# 
-    # '''
-    # These are the actions the snake can take.
-    # The NOOP is to create a new game.
-    # DMAP maps actions to respective dx and dy.
-    # '''
-    # LEFT = 0
-    # UP = 1
-    # RIGHT = 2
-    # DOWN = 3
-    # NOOP = -1
-    # ACTIONS = [NOOP, LEFT, UP, RIGHT, DOWN]
-    # DMAP = {}
-    # DMAP[LEFT] = (-1, 0)
-    # DMAP[UP] = (0, -1)
-    # DMAP[RIGHT] = (1, 0)
-    # DMAP[DOWN] = (0, 1)
-    # DMAP[NOOP] = (0, 0)
-# 
-    # def __init__(self, width, height):
-        # ''' Create a snake game with set width and height '''
-        # self.width = width 
-        # self.height = height
-        # self.newGame()
- # 
-    # def newGame(self): 
-        # ''' Setting a game up. ''' 
-        # self.length = 1
-        # self.snake = [(self.height / 2, self.width / 2)]
-        # self.snake = [self.genApple()]
-        # self.apple = self.genApple()
-# 
-        # self.dx = 0
-        # self.dy = 0
-# 
-        # self.ongoing = True
-# 
-    # def genApple(self):
-        # ''' Just generates a random (x, y) pair. '''
-        # apple = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-        # return apple
-# 
-# 
-    # def update(self):
-        # ''' Updates the game. Moves the snake and then checks for status changes
-        # like game over or picked up apple. '''
-        # if self.ongoing:
-            # # Move
-            # self.transition()
-            # 
-            # # Check Collision
-            # if self.head() in self.body():
-                # self.ongoing = False
-                # return False
-# 
-            # # Check Offscreen
-            # if self.head()[0] < 0 or self.head()[1] < 0 or self.head()[0] >= self.width or self.head()[1] >= self.height:
-                    # self.ongoing = False
-                    # return False
-# 
-            # # Check Apple
-            # if self.head() == self.apple:
-                # self.length += 1
-                # self.apple = self.genApple()
-            # return True
-        # else:
-            # if self.dx == 0 and self.dy == 0:
-                # self.newGame()
-# 
-    # def head(self):
-        # ''' Get the head of the snake '''
-        # return self.snake[-1]
-# 
-    # def move(self, action):
-        # ''' Sets the dx and dy of the snake, and then updates the game. '''
-        # dx, dy = Snake.DMAP[action]
-        # self.dx = dx
-        # self.dy = dy
-        # self.update()
-# 
-    # def transition(self):
-        # ''' Moves the snake. '''
-        # headx, heady = self.snake[-1]
-        # self.snake.append((headx + self.dx, heady + self.dy))
-# 
-        # while len(self.snake) > self.length:
-            # self.snake.pop(0)
-
 
 class App:
     ''' The GUI of the game '''
@@ -321,6 +233,8 @@ class App:
         ''' Draws a grid point '''
         x, y, endx, endy = self.getCoords(coordx, coordy)
         rect = self.canvas.create_rectangle( x, y, endx, endy, fill=color)
+        if (coordx, coordy) in self.drawn:
+            self.canvas.delete(self.drawn[(coordx, coordy)])
         self.drawn[(coordx, coordy)] = rect
         return rect
 

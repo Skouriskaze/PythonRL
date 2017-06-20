@@ -5,45 +5,87 @@ import time
 import sys
 import heapq
 
-# TODO: RL to play Snake
-# TODO: A* smart to play Snake
 
-
-
+# TODO: Save in a file?
 class QLearner:
-    def __init__(self, game):
+    # Bellman Eq
+    # Q(state, action) = R(state, action) + Gamma * Max[Q(next state, all actions)]
+    def __init__(self, game, alpha=0.1, gamma=0.95, epsilon=0.8):
         self.game = game
         self.qvalue = dict()
 
         # Learning rate
-        self.alpha = 0.1
+        self.alpha = alpha
         # Gamma
-        self.gamma = 0.95
+        self.gamma = gamma
         # Epsilon
-        self.epsilon = 0.8
+        self.epsilon = epsilon
+
+        self.iteration = 0
+
+    def initQvalue(self):
+        pass
+
+    def get(self, state):
+        if state not in self.qvalue:
+            self.qvalue[state] = random.random() * 10
+        return self.qvalue[state]
+
+    def trainStep(self):
+        state = self._getState(self.game)
+        action = self.getTrainMove(state)
+        reward, result = self.game.submitMove(action)
+        
+        self.qvalue[state] = reward + self.gamma * self.get(result)
+
+        self.iteration += 1
+        sys.stdout.write("%d \r" % self.iteration)
+        sys.stdout.flush()
 
     def getTrainMove(self, state):
-        if random.random() < self.epsilon:
-            # TODO: Maybe make it so you choose something that's not policy
-            return Snake.randomAction()
+        if self.game.ongoing:
+            if random.random() < self.epsilon:
+                # TODO: Maybe make it so you choose something that's not policy
+                return Snake.randomAction()
+            else:
+                return getPolicyMove(self)
         else:
-            return getPolicyMove(self)
+            return Snake.ACTIONS.NOOP
 
     def getPolicyMove(self, state):
-        policyMove = (None, Snake.NOOP)
-        for action in Snake.ACTIONS:
-            newstate = self.game.pollAction(state, action)
-            if self.game.isEmpty(newstate):
-                policyMove = max(policyMove, (self.qvalue[newstate], action))
-        return policyMove
+        if self.game.ongoing:
+            policyMove = (None, Snake.NOOP)
+            for action in Snake.ACTIONS:
+                newstate = self.game.pollAction(state, action)
+                if not self.game.isEmpty(newstate):
+                    policyMove = max(policyMove, (self.get[newstate], action))
+            if policyMove[1] == Snake.NOOP:
+                return Snake.randomAction()
+            return policyMove
+        else:
+            return Snake.ACTIONS.NOOP
 
+    def _getState(self):
+        head = self.game.head()
+        apple = self.game.apple
+
+        return None
+
+
+    def _saveQ(self, filepath='qvalues.txt'):
+        with open(filepath, 'w') as f:
+            f.write(self.qvalue)
+    def loadQ(self, filepath='qvalues.txt'):
+        with open(filepath, 'r') as f:
+            qvalue = f.read()
+        self.qvalue = eval(qvalue)
 
 def main():
     class Info:
         ''' This class holds information that the thread can access. '''
         pass
     Info.ongoing = True # Whether we should continue sending moves.
-    Info.snake = Snake(8, 8) # Snake game
+    Info.snake = Snake(10, 10) # Snake game
 
     Info.score = 0
     def makeMove():
@@ -63,10 +105,19 @@ def main():
                 # The game is over. Wait some time and then
                 # reset the game
                 time.sleep(1)
-                Info.snake.newGame()
+                Info.snake.submitMove(Snake.NOOP)
                 Info.score = 0
+
+    def trainQL():
+        ''' Thread that learns '''
+        ql = QLearner(Info.snake)
+        for i in xrange(1000):
+            ql.trainStep()
+        runQL()
                     
                 
+    def runQL():
+        pass
             
     def chooseMove():
         ''' Chooses a move. Naively heads to the horizontal coordinate,
@@ -98,6 +149,7 @@ def main():
             if Info.snake.isEmpty(neighbor):
                 best = min(best, (dist(neighbor, goal), action))
 
+
         if best[1] == None:
             return Snake.randomAction()
 
@@ -113,8 +165,6 @@ def main():
 
         parents = dict()
         parents[start] = (Snake.NOOP, start)
-        costs = dict()
-        costs[start] = 0
 
         q = [(0, start)]
         while q:
@@ -127,14 +177,12 @@ def main():
                 return action
 
             # Adds neighbors to the queue
-            # TODO: Apple in snake gets stuck in astar
             for action in Snake.ACTIONS:
                 neighbor = Info.snake.pollAction(curr, action)
                 if Info.snake.isEmpty(neighbor) and \
-                        (neighbor not in costs or costs[neighbor] > cost + 1):
+                        (neighbor not in parents):
                     parents[neighbor] = (action, curr)
-                    costs[neighbor] = cost + 1
-                    heapq.heappush(q, (dist(neighbor, goal) + cost + 1, neighbor))
+                    heapq.heappush(q, (dist(neighbor, goal), neighbor))
 
         # If A* cannot find a path, take the greedy best first action
         return gbf()
@@ -145,7 +193,7 @@ def main():
     thd = threading.Thread(name="Movemaker", target=makeMove)
     thd.daemon = True
     thd.start() 
-    app.start()
+    # app.start()
 
     Info.ongoing = False
 
