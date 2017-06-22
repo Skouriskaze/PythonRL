@@ -2,6 +2,7 @@
 
 class Cube:
     def __init__(self):
+        TODO: Get rid of the crap design
         self.U = [0 for x in range(4)]
         self.D = [1 for x in range(4)]
         self.L = [2 for x in range(4)]
@@ -24,3 +25,9 @@ class Cube:
         self.L = self.F[:2] + self.L[2:]
         self.B = self.R[:2] + self.F[2:]
         self.R = self.R[:2] + self.F[2:]
+
+
+if __name__ == '__main__':
+    c = Cube()
+    for l in ['u', 'd', 'l', 'r', 'f', 'b']:
+        print "%s: %s" % (l, c.getLayer(l))
