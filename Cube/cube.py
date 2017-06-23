@@ -61,8 +61,11 @@ class Cube:
     LAYERS = ['U', 'D', 'L', 'R', 'F', 'B']
     MOVES = [l for l in LAYERS] + [l + "'" for l in LAYERS]
 
-    def __init__(self):
-        self.resetCube()
+    def __init__(self, state=None):
+        if not state:
+            self.resetCube()
+        else:
+            self.setCube(state)
 
         self._cubieIndices = dict()
         self._cubieIndices['U'] = [0, 1, 3, 2]
@@ -71,6 +74,17 @@ class Cube:
         self._cubieIndices['R'] = [3, 1, 5, 7]
         self._cubieIndices['F'] = [2, 3, 7, 6]
         self._cubieIndices['B'] = [1, 0, 4, 5]
+
+    def setCube(self, state):
+        if type(state) == str:
+            state = eval(state)
+
+        self.cubies = [Cubie() for _ in range(8)]
+
+        for layer in Cube.LAYERS:
+            for face, cubie in zip(state[:4], self.getLayer(layer)):
+                cubie.setFace(layer, face)
+            state = state[4:]
 
     def getLayer(self, layer):
         if layer not in Cube.LAYERS:
@@ -111,10 +125,11 @@ class Cube:
             skip = self.setCubie(index, skip)
 
     def turn(self, move, prime=False):
+        move = move.upper()
         if len(move) > 1:
             if move[1] == "'":
                 prime = True
-            move = move[0].upper()
+            move = move[0]
 
         for cubie in self.getLayer(move):
             if move == 'U':
@@ -154,6 +169,22 @@ class Cube:
 
         return moves
 
+    def isSolved(self):
+        for layer in Cube.LAYERS:
+            cubies = [cubie.getFace(layer) for cubie in self.getLayer(layer)]
+            if not all([c == cubies[0] for c in cubies]):
+                return False
+        return True
+
+
+    def __repr__(self):
+        state = []
+        faces = dict()
+        for layer in Cube.LAYERS:
+            cubies = [cubie.getFace(layer) for cubie in self.getLayer(layer)]
+            state += cubies
+        return str(state)
+
     def __str__(self):
         ret = ''
         faces = dict()
@@ -168,9 +199,11 @@ class Cube:
         ret += '\n'
 
 
-        ret += str(faces['L'][:2]) + str(faces['F'][:2]) + str(faces['R'][:2]) + str(faces['B'][:2])
+        ret += str(faces['L'][:2]) + str(faces['F'][:2]) + str(faces['R'][:2]) \
+            + str(faces['B'][:2])
         ret += '\n'
-        ret += str(faces['L'][2:]) + str(faces['F'][2:]) + str(faces['R'][2:]) + str(faces['B'][2:])
+        ret += str(faces['L'][2:]) + str(faces['F'][2:]) + str(faces['R'][2:]) \
+            + str(faces['B'][2:])
         ret += '\n'
 
         ret += ' ' * 6
@@ -181,9 +214,62 @@ class Cube:
         ret += '\n'
         return ret
 
+class CubeWrapper:
+    # TODO: Get better polling states, make cube constructor with a state
+    def __init__(self, cube=None):
+        if cube:
+            self.cube = cube
+        else:
+            self.cube = Cube()
+
+    def getState(self, cube=None):
+        if not cube:
+            cube = self.cube
+        return repr(cube)
+
+    def _getOpposite(self, move):
+        move = move.upper()
+        idx = Cube.MOVES.index(move)
+        return Cube.MOVES[idx - len(Cube.MOVES) / 2]
+
+    def pollState(self, move, cube=None):
+        if not cube:
+            cube = self.cube
+
+        cube.turn(move)
+        state = self.getState(cube)
+        cube.turn(self._getOpposite(move))
+
+    def move(self, move):
+        pass
+
+    def reward(self, state, move, statep):
+        # if statep
+        pass
+
+    @staticmethod
+    def stateDifference(s1, s2):
+        diff = 0
+        assert len(s1) == len(s2)
+        for a, b in zip(s1, s2):
+            diff += abs(a - b)
+        return diff
+
+
 if __name__ == '__main__':
-    for m in Cube.MOVES:
-        c = Cube()
-        c.turn(m)
-        print m
-        print c
+    c = Cube()
+    c.moveAlgorithm("r")
+    print c
+    s = repr(c)
+
+    c = Cube(s)
+    print c
+
+
+    # c.moveAlgorithm("rl' ud' fb'")
+    # print c
+    # print c.isSolved()
+    # cw = CubeWrapper(c)
+
+    # from learner import SARSA
+    
