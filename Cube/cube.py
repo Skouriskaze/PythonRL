@@ -176,8 +176,8 @@ class Cube:
                 return False
         return True
 
-
     def __repr__(self):
+        # TODO: Put this in another method
         state = []
         faces = dict()
         for layer in Cube.LAYERS:
@@ -239,13 +239,33 @@ class CubeWrapper:
         cube.turn(move)
         state = self.getState(cube)
         cube.turn(self._getOpposite(move))
+        return state
+
+    def isStateSolved(self, state=None):
+        if not state:
+            state = self.getState()
+
+        assert len(state) % 4 == 0
+        while state:
+            temp = state[:4]
+            if not all([c == temp[0] for c in temp]):
+                return False
+            state = state[4:]
+
+        return True
 
     def move(self, move):
-        pass
+        state = self.getState()
+        self.cube.turn(move)
+        statep = self.getState()
+
+        return reward(state, move, statep)
 
     def reward(self, state, move, statep):
-        # if statep
-        pass
+        if self.isStateSolved(statep):
+            return 100
+        else:
+            return -1
 
     @staticmethod
     def stateDifference(s1, s2):
