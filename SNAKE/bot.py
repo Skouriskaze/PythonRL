@@ -100,7 +100,7 @@ def main():
                 reward = Info.snake.submitMove(action)
                 # sys.stdout.write('%s   \r' % (action))
                 # sys.stdout.flush()
-                Info.score += reward
+                # Info.score += reward
             else:
                 # The game is over. Wait some time and then
                 # reset the game
@@ -193,7 +193,7 @@ def main():
     thd = threading.Thread(name="Movemaker", target=makeMove)
     thd.daemon = True
     thd.start() 
-    # app.start()
+    app.start()
 
     Info.ongoing = False
 
