@@ -1,3 +1,4 @@
+import random
 
 class Cubie:
     FACES = ['U', 'D', 'L', 'R', 'F', 'B']
@@ -74,6 +75,11 @@ class Cube:
         self._cubieIndices['R'] = [3, 1, 5, 7]
         self._cubieIndices['F'] = [2, 3, 7, 6]
         self._cubieIndices['B'] = [1, 0, 4, 5]
+
+    def scrambleCube(self, moves=1):
+        actions = [random.choice(Cube.MOVES) for _ in range(moves)]
+        for action in actions:
+            self.turn(action)
 
     def setCube(self, state):
         if type(state) == str:
@@ -176,14 +182,14 @@ class Cube:
                 return False
         return True
 
-    def __repr__(self):
+    def toState(self):
         # TODO: Put this in another method
         state = []
         faces = dict()
         for layer in Cube.LAYERS:
             cubies = [cubie.getFace(layer) for cubie in self.getLayer(layer)]
             state += cubies
-        return str(state)
+        return tuple(state)
 
     def __str__(self):
         ret = ''
@@ -222,10 +228,13 @@ class CubeWrapper:
         else:
             self.cube = Cube()
 
+    def getInitState(self):
+        self.cube.scrambleCube()
+
     def getState(self, cube=None):
         if not cube:
             cube = self.cube
-        return repr(cube)
+        return cube.toState()
 
     def _getOpposite(self, move):
         move = move.upper()
@@ -256,10 +265,15 @@ class CubeWrapper:
 
     def move(self, move):
         state = self.getState()
-        self.cube.turn(move)
-        statep = self.getState()
+        if self.isStateSolved(state):
+            # TODO: rename scramble
+            self.game.scrambleCube()
+            statep = self.getState()
+        else:
+            self.cube.turn(move)
+            statep = self.getState()
 
-        return reward(state, move, statep)
+        return statep, self.reward(state, move, statep)
 
     def reward(self, state, move, statep):
         if self.isStateSolved(statep):
@@ -280,7 +294,7 @@ if __name__ == '__main__':
     c = Cube()
     c.moveAlgorithm("r")
     print c
-    s = repr(c)
+    s = c
 
     c = Cube(s)
     print c

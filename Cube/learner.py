@@ -1,31 +1,48 @@
 import random
+import time
 from cube import CubeWrapper, Cube
 
 class SARSA:
     def __init__(self, wrapper, alpha=1, gamma=0.95):
         self.game = wrapper
         self.qvalues = dict()
+        self.alpha = alpha
+        self.gamma = gamma
+
+        try:
+            self.loadQ()
+        except:
+            print "No q file"
+
+    def learn(self, iterations, epsilon=0.5):
+        for i in range(iterations):
+            self.iterate(epsilon)
+            if i % 100 == 0 and i > 0:
+                with open('qvalues.txt', 'w') as f:
+                    f.write(str(self.qvalues))
+
+        self.saveQ()
+
+    def saveQ(self):
+        with open('qvalues.txt', 'w') as f:
+            f.write(str(self.qvalues))
+
+    def loadQ(self):
+        with open('qvalues.txt') as f:
+            self.qvalues = eval(f.read())
+
 
     def getOptimal(self, state):
-        # TODO: Move this if down into
-        if state not in self.qvalues:
-            if len(self.qvalues) == 0:
-                self.qvalues[state] = 0
-            else:
-                nearest = (999999, 0)
-                for k in self.qvalues:
-                    nearest = min(nearest, (CubeWrapper.stateDifference(state, k),
-                        self.qvalues[k]))
-
         best = (-999999, None)
         for action in Cube.MOVES:
             neighbor = self.game.pollState(action)
-            best = max(best, (self.qvalues[neighbor], action))
+            best = max(best, (self.getValue(neighbor), action))
 
-        return best
+        return best[1]
 
 
     def getRandom(self, state):
+        # TODO: Make this better (cube)
         return random.choice(Cube.MOVES)
 
     def iterate(self, epsilon = 0.5):
@@ -35,9 +52,37 @@ class SARSA:
         else:
             action = self.getOptimal(state)
 
-        reward = self.game.move(action)
         self.update(state, action)
 
-    def update(self, state, action, reward):
-        # TODO: Finish this
-        self.qvalues[state] = self.qvalues[state] + alpha * (reward + gamma * 
+    def update(self, state, action):
+        statep, reward = self.game.move(action)
+        self.qvalues[state] = self.getValue(state) + self.alpha * (reward + self.gamma *
+                self.getValue(statep) - self.getValue(state))
+
+    def getValue(self, state):
+        if state not in self.qvalues:
+            if len(self.qvalues) == 0:
+                self.qvalues[state] = 0
+            else:
+                nearest = (999999, 0)
+                for k in self.qvalues:
+                    nearest = min(nearest, (CubeWrapper.stateDifference(state, k),
+                        self.qvalues[k]))
+                self.qvalues[state] = nearest[1]
+
+        return self.qvalues[state]
+
+
+
+if __name__ == '__main__':
+    cw = CubeWrapper()
+    cw.getInitState()
+
+    learner = SARSA(cw)
+    oldQ = learner.qvalues
+
+    print "Started learning."
+    start = time.time()
+    learner.learn(10000)
+    newQ = learner.qvalues
+    print "Ended learning, took %d time" % (time.time() - start)
