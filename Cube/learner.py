@@ -17,8 +17,8 @@ class SARSA:
 
     def learn(self, iterations, epsilon=0.5):
         for i in range(iterations):
-            self.iterate(epsilon)
-            sys.stdout.write(str(i) + '\r')
+            first, second = self.iterate(epsilon)
+            sys.stdout.write('%d: %3f, %3f\r' % (i, first, second))
             sys.stdout.flush()
             if i % 100 == 0 and i > 0:
                 with open('qvalues.txt', 'w') as f:
@@ -49,13 +49,17 @@ class SARSA:
         return random.choice(Cube.MOVES)
 
     def iterate(self, epsilon = 0.5):
+        now = time.time()
         state = self.game.getState()
         if random.random() < epsilon:
             action = self.getRandom(state)
         else:
             action = self.getOptimal(state)
+        first = time.time() - now
+        now = time.time()
 
         self.update(state, action)
+        return first, time.time() - now
 
     def update(self, state, action):
         statep, reward = self.game.move(action)
