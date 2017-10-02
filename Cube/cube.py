@@ -267,7 +267,7 @@ class CubeWrapper:
         state = self.getState()
         if self.isStateSolved(state):
             # TODO: rename scramble
-            self.game.scrambleCube()
+            self.cube.scrambleCube()
             statep = self.getState()
         else:
             self.cube.turn(move)
