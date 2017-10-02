@@ -1,5 +1,6 @@
 import random
 import time
+import sys
 from cube import CubeWrapper, Cube
 
 class SARSA:
@@ -16,6 +17,7 @@ class SARSA:
 
     def learn(self, iterations, epsilon=0.5):
         for i in range(iterations):
+            sys.stdout.write('%d\r' % i)
             self.iterate(epsilon)
             if i % 100 == 0 and i > 0:
                 with open('qvalues.txt', 'w') as f:
@@ -83,6 +85,6 @@ if __name__ == '__main__':
 
     print "Started learning."
     start = time.time()
-    learner.learn(10000)
+    learner.learn(100)
     newQ = learner.qvalues
     print "Ended learning, took %d time" % (time.time() - start)
