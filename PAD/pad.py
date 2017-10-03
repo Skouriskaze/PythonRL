@@ -25,9 +25,9 @@ class Piece(Enum):
 
 class Board:
     def __init__(self, width, height):
-        self.board = [[random.choice(list(Piece)) for _ in range(width)] for _ in range(height)]
+        self.board = [[random.choice(list(Piece)) for i in range(width)] for j in range(height)]
         self.move_count = 0
-        self.curr_piece = self.curr_x, self.curr_y = 0, 0
+        self.curr_piece = self.curr_x, self.curr_y = -1, -1
 
         self.width = width
         self.height = height
@@ -69,7 +69,7 @@ class Board:
 
 class PAD(Game):
     class RenderProperties:
-        PADDING = 2
+        PADDING = 4
         PIECE_SIZE = 64
         BOARD_SIZE = 6, 5
         GAME_WIDTH = PIECE_SIZE * BOARD_SIZE[0]
@@ -79,16 +79,29 @@ class PAD(Game):
     def __init__(self):
         super().__init__(PAD.RenderProperties.GAME_WIDTH, PAD.RenderProperties.GAME_HEIGHT)
         self.board = Board(*PAD.RenderProperties.BOARD_SIZE)
+        self.mouse_down_prev = False
+        self.mouse_loc_prev = (-1, -1)
 
     def process_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-        m1, _, _ = pygame.mouse.get_pressed()
-        if m1:
-            i, j = self.pixel_to_coord(*pygame.mouse.get_pos())
-            # TODO
+        mouse_down_curr, _, _ = pygame.mouse.get_pressed()
+        mouse_loc_curr = pygame.mouse.get_pos()
+        coords_curr = self.pixel_to_coord(*mouse_loc_curr)
+        coords_prev = self.pixel_to_coord(*self.mouse_loc_prev)
+
+        if mouse_down_curr:
+            self.board.curr_piece = coords_curr
+        elif not mouse_down_curr and self.mouse_down_prev:
+            self.board.curr_piece = -1, -1
+
+        if mouse_down_curr and coords_curr != coords_prev:
+            self.board.move(coords_curr, coords_prev)
+
+        self.mouse_down_prev = mouse_down_curr
+        self.mouse_loc_prev = mouse_loc_curr
 
     def pixel_to_coord(self, x, y):
         return (x // PAD.RenderProperties.PIECE_SIZE,
@@ -105,16 +118,37 @@ class PAD(Game):
         self.screen.fill(Color.BLACK)
         for j in range(PAD.RenderProperties.BOARD_SIZE[1]):
             for i in range(PAD.RenderProperties.BOARD_SIZE[0]):
-                self._draw_piece(i, j)
+                if self.board.curr_piece != (i, j):
+                    self._draw_piece(i, j)
+
+                if self.board.curr_piece > (-1, -1):
+                    self._draw_exact_rect_centered(*pygame.mouse.get_pos())
                 
         pygame.display.flip()
 
     def _draw_piece(self, i, j, trans=False):
         coords = self.coord_to_pixel(i, j)
-        rect = pygame.Rect(coords[0], coords[1],
+        self._draw_exact_rect(*coords)
+        # rect = pygame.Rect(coords[0], coords[1],
+                # PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING,
+                # PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING)
+        # pygame.draw.rect(self.screen, self.board.get_piece((i, j)).get_color(), rect)
+
+    def _draw_exact_rect(self, x, y):
+        coords = self.pixel_to_coord(x, y)
+        rect = pygame.Rect(x, y,
                 PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING,
                 PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING)
-        pygame.draw.rect(self.screen, self.board.get_piece((i, j)).get_color(), rect)
+        pygame.draw.rect(self.screen, self.board.get_piece(coords).get_color(), rect)
+
+    def _draw_exact_rect_centered(self, x, y):
+        coords = self.pixel_to_coord(x, y)
+        rect = pygame.Rect(
+                x - PAD.RenderProperties.PIECE_SIZE / 2,
+                y - PAD.RenderProperties.PIECE_SIZE / 2,
+                PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING,
+                PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING)
+        pygame.draw.rect(self.screen, self.board.get_piece(coords).get_color(), rect)
 
 
 if __name__ == '__main__':
