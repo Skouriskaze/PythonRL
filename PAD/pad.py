@@ -24,6 +24,12 @@ class Piece(Enum):
             return (255, 0, 255)
 
 class Board:
+    class Direction(Enum):
+        RIGHT = (1, 0)
+        DOWN = (0, 1)
+        LEFT = (-1, 0)
+        UP = (0, -1)
+
     def __init__(self, width, height):
         self.board = [[random.choice(list(Piece)) for i in range(width)] for j in range(height)]
         self.move_count = 0
@@ -40,7 +46,19 @@ class Board:
         x, y = loc
         self.board[y][x] = value
 
-    def move(self, loc1, loc2):
+    def move(self, direction):
+        if self.curr_piece < (0, 0):
+            return
+
+        new_piece = tuple(i + d for i, d in zip(self.curr_piece, direction))
+        if new_piece[0] < 0 or new_piece[0] >= self.width:
+            return
+        if new_piece[1] < 0 or new_piece[1] >= self.height:
+            return
+
+        self._swap(self.curr_piece, new_piece)
+
+    def _swap(self, loc1, loc2):
         curr = self.get_piece(loc1)
         self.set_piece(loc1, self.get_piece(loc2))
         self.set_piece(loc2, curr)
@@ -92,16 +110,26 @@ class PAD(Game):
         coords_curr = self.pixel_to_coord(*mouse_loc_curr)
         coords_prev = self.pixel_to_coord(*self.mouse_loc_prev)
 
+
+        if mouse_down_curr and coords_curr != coords_prev:
+            direction = tuple(y - x for x, y in zip(coords_prev, coords_curr))
+            self.board.move(direction)
+            # TODO: Use Direction.
+        elif False:
+            # TODO: Keyboard
+            pass
+
+        # IMPORTANT: Keep this below move.
         if mouse_down_curr:
             self.board.curr_piece = coords_curr
         elif not mouse_down_curr and self.mouse_down_prev:
             self.board.curr_piece = -1, -1
 
-        if mouse_down_curr and coords_curr != coords_prev:
-            self.board.move(coords_curr, coords_prev)
-
         self.mouse_down_prev = mouse_down_curr
         self.mouse_loc_prev = mouse_loc_curr
+
+
+    # ---------------------- UTILITY ----------------------
 
     def pixel_to_coord(self, x, y):
         return (x // PAD.RenderProperties.PIECE_SIZE,
@@ -114,6 +142,7 @@ class PAD(Game):
     def update(self):
         pass
 
+    # ---------------------- RENDERING -----------------------
     def render(self):
         self.screen.fill(Color.BLACK)
         for j in range(PAD.RenderProperties.BOARD_SIZE[1]):
@@ -129,10 +158,6 @@ class PAD(Game):
     def _draw_piece(self, i, j, trans=False):
         coords = self.coord_to_pixel(i, j)
         self._draw_exact_rect(*coords)
-        # rect = pygame.Rect(coords[0], coords[1],
-                # PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING,
-                # PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING)
-        # pygame.draw.rect(self.screen, self.board.get_piece((i, j)).get_color(), rect)
 
     def _draw_exact_rect(self, x, y):
         coords = self.pixel_to_coord(x, y)
