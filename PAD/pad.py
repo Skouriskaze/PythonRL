@@ -99,6 +99,8 @@ class PAD(Game):
         self.board = Board(*PAD.RenderProperties.BOARD_SIZE)
         self.mouse_down_prev = False
         self.mouse_loc_prev = (-1, -1)
+        self.old_keys = pygame.key.get_pressed()
+        self.mode = 'Mouse'
 
     def process_events(self):
         for event in pygame.event.get():
@@ -109,15 +111,39 @@ class PAD(Game):
         mouse_loc_curr = pygame.mouse.get_pos()
         coords_curr = self.pixel_to_coord(*mouse_loc_curr)
         coords_prev = self.pixel_to_coord(*self.mouse_loc_prev)
+        keys = pygame.key.get_pressed()
 
 
         if mouse_down_curr and coords_curr != coords_prev:
+            self.mode = 'Mouse'
             direction = tuple(y - x for x, y in zip(coords_prev, coords_curr))
             self.board.move(direction)
-            # TODO: Use Direction.
-        elif False:
-            # TODO: Keyboard
-            pass
+        elif any(keys):
+            self.mode = 'Keyboard'
+            if keys[pygame.K_SPACE] and not self.old_keys[pygame.K_SPACE]:
+                if self.board.curr_piece < (0, 0):
+                    self.board.curr_piece = self.pixel_to_coord(*pygame.mouse.get_pos())
+                else:
+                    self.board.curr_piece = (-1, -1)
+
+            action = None
+            if keys[pygame.K_RIGHT] and not self.old_keys[pygame.K_RIGHT]:
+                action = Board.Direction.RIGHT
+            elif keys[pygame.K_DOWN] and not self.old_keys[pygame.K_DOWN]:
+                action = Board.Direction.DOWN
+            elif keys[pygame.K_LEFT] and not self.old_keys[pygame.K_LEFT]:
+                action = Board.Direction.LEFT
+            elif keys[pygame.K_UP] and not self.old_keys[pygame.K_UP]:
+                action = Board.Direction.UP
+
+            if action:
+                self.board.move(action.value)
+                new_piece = tuple(i + d for i, d in zip(self.board.curr_piece, action.value))
+                if new_piece[0] < 0 or new_piece[0] >= self.board.width:
+                    return
+                if new_piece[1] < 0 or new_piece[1] >= self.board.height:
+                    return
+                self.board.curr_piece = new_piece
 
         # IMPORTANT: Keep this below move.
         if mouse_down_curr:
@@ -127,6 +153,7 @@ class PAD(Game):
 
         self.mouse_down_prev = mouse_down_curr
         self.mouse_loc_prev = mouse_loc_curr
+        self.old_keys = keys
 
 
     # ---------------------- UTILITY ----------------------
@@ -150,8 +177,13 @@ class PAD(Game):
                 if self.board.curr_piece != (i, j):
                     self._draw_piece(i, j)
 
-                if self.board.curr_piece > (-1, -1):
-                    self._draw_exact_rect_centered(*pygame.mouse.get_pos())
+                if self.mode == 'Mouse':
+                    if self.board.curr_piece > (-1, -1):
+                        self._draw_exact_rect_centered(*pygame.mouse.get_pos())
+                else:
+                    if self.board.curr_piece > (-1, -1):
+                        self._draw_piece(*self.board.curr_piece)
+
                 
         pygame.display.flip()
 
