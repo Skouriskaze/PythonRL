@@ -10,18 +10,21 @@ class Piece(Enum):
     BLUE = 2
     YELLOW = 3
     DARK = 4
+    # NONE = 5
 
     def get_color(self):
         if self.value == 0:
             return (255, 0, 0)
         if self.value == 1:
-            return (0, 255, 0)
+            return (34, 139, 34)
         if self.value == 2:
             return (0, 0, 255)
         if self.value == 3:
-            return (0, 255, 255)
+            return (255, 255, 0)
         if self.value == 4:
-            return (255, 0, 255)
+            return (128, 0, 128)
+        # if self.value == 5:
+            # return (0, 0, 0)
 
 class Board:
     class Direction(Enum):
@@ -38,6 +41,8 @@ class Board:
         self.width = width
         self.height = height
 
+
+    # -------------------- MOVEMENT --------------------
     def get_piece(self, loc):
         x, y = loc
         return self.board[y][x]
@@ -57,17 +62,77 @@ class Board:
             return
 
         self._swap(self.curr_piece, new_piece)
+        self.move_count += 1
 
     def _swap(self, loc1, loc2):
         curr = self.get_piece(loc1)
         self.set_piece(loc1, self.get_piece(loc2))
         self.set_piece(loc2, curr)
 
+    # -------------------- BOARD CLEAR --------------------
     def end_turn(self):
-        # return score
-        return 0
+        score = self.clear_combos()
+        self.move_count = 0
+        return score
 
 
+    def clear_combos(self):
+        visited = []
+        hor_match = self._check_horizontal((0, 0), visited)
+        
+        for orb in hor_match:
+            self.set_piece(orb, Piece.NONE)
+
+        self._drop_board()
+
+
+
+    def _drop_board(self):
+        for j in range(len(self.board)):
+            for i in range(len(self.board[j])):
+                d = 0
+                while self.get_piece((i, j + d + 1)) == Piece.NONE:
+                    d += 1
+
+                if d:
+                    self.set_piece((i, j + d + 1), self.get_piece((i, j)))
+                    self.set_piece((i, j), Piece.NONE)
+
+
+    def _fill_board(self):
+        pass
+
+    def _check_horizontal(self, coord, visited):
+        # Return a list of horizontal orbs
+        x, y = coord
+        count = 0
+        idp = 1
+        idn = 1
+        color = self.get_piece(coord)
+        ret = []
+
+
+        while self.get_piece((x + idp, y)) == color:
+            count += 1
+            idp += 1
+        while self.get_piece((x - idn, y)) == color:
+            count += 1
+            idn += 1
+
+        if count > 2:
+            for i in range(idn, idp + 1):
+                if (x + i, y) not in visited:
+                    ret.append((x + i, y))
+                    visited.append((x + i, y))
+
+        return ret
+
+    def _check_vertical(self, coord):
+        # Return a list of horizontal orbs
+        pass
+
+
+    # -------------------- DEBUGGING  --------------------
     def __repr__(self):
         s = ""
         for x in self.board:
@@ -150,6 +215,7 @@ class PAD(Game):
             self.board.curr_piece = coords_curr
         elif not mouse_down_curr and self.mouse_down_prev:
             self.board.curr_piece = -1, -1
+            # self.board.end_turn()
 
         self.mouse_down_prev = mouse_down_curr
         self.mouse_loc_prev = mouse_loc_curr
@@ -179,7 +245,7 @@ class PAD(Game):
 
                 if self.mode == 'Mouse':
                     if self.board.curr_piece > (-1, -1):
-                        self._draw_exact_rect_centered(*pygame.mouse.get_pos())
+                        self._draw_exact_piece(*pygame.mouse.get_pos())
                 else:
                     if self.board.curr_piece > (-1, -1):
                         self._draw_piece(*self.board.curr_piece)
@@ -189,23 +255,16 @@ class PAD(Game):
 
     def _draw_piece(self, i, j, trans=False):
         coords = self.coord_to_pixel(i, j)
-        self._draw_exact_rect(*coords)
+        # self._draw_exact_rect(*coords)
+        pygame.draw.circle(self.screen, self.board.get_piece((i, j)).get_color(),
+                tuple (x + PAD.RenderProperties.PIECE_SIZE // 2 for x in coords),
+                (PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING) // 2)
 
-    def _draw_exact_rect(self, x, y):
+    def _draw_exact_piece(self, x, y):
         coords = self.pixel_to_coord(x, y)
-        rect = pygame.Rect(x, y,
-                PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING,
-                PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING)
-        pygame.draw.rect(self.screen, self.board.get_piece(coords).get_color(), rect)
-
-    def _draw_exact_rect_centered(self, x, y):
-        coords = self.pixel_to_coord(x, y)
-        rect = pygame.Rect(
-                x - PAD.RenderProperties.PIECE_SIZE / 2,
-                y - PAD.RenderProperties.PIECE_SIZE / 2,
-                PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING,
-                PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING)
-        pygame.draw.rect(self.screen, self.board.get_piece(coords).get_color(), rect)
+        pygame.draw.circle(self.screen, self.board.get_piece(coords).get_color(),
+                (x, y),
+                (PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING) // 2)
 
 
 if __name__ == '__main__':
