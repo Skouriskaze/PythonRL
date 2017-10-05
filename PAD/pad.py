@@ -71,6 +71,8 @@ class Board:
 
     # -------------------- BOARD CLEAR --------------------
     def end_turn(self):
+        # Consider doing a flood fill/bfs and then grabbing the height and width of each
+        # item.
         score = self.clear_combos()
         self.move_count = 0
         return score
@@ -81,7 +83,7 @@ class Board:
         hor_match = self._check_horizontal((0, 0), visited)
         
         for orb in hor_match:
-            self.set_piece(orb, Piece.NONE)
+            self.set_piece(orb, None)
 
         self._drop_board()
 
@@ -91,12 +93,12 @@ class Board:
         for j in range(len(self.board)):
             for i in range(len(self.board[j])):
                 d = 0
-                while self.get_piece((i, j + d + 1)) == Piece.NONE:
+                while self.get_piece((i, j + d + 1)) == None:
                     d += 1
 
                 if d:
                     self.set_piece((i, j + d + 1), self.get_piece((i, j)))
-                    self.set_piece((i, j), Piece.NONE)
+                    self.set_piece((i, j), None)
 
 
     def _fill_board(self):
@@ -255,10 +257,7 @@ class PAD(Game):
 
     def _draw_piece(self, i, j, trans=False):
         coords = self.coord_to_pixel(i, j)
-        # self._draw_exact_rect(*coords)
-        pygame.draw.circle(self.screen, self.board.get_piece((i, j)).get_color(),
-                tuple (x + PAD.RenderProperties.PIECE_SIZE // 2 for x in coords),
-                (PAD.RenderProperties.PIECE_SIZE - 2 * PAD.RenderProperties.PADDING) // 2)
+        self._draw_exact_piece(*tuple(x + PAD.RenderProperties.PIECE_SIZE // 2 for x in coords))
 
     def _draw_exact_piece(self, x, y):
         coords = self.pixel_to_coord(x, y)
