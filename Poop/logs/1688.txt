@@ -1,0 +1,55 @@
+A new toilet was drawn: Toilet: GREEN 11.
+Jesse drew BLUE 0. 1 cards remaining.
+Nat drew GREEN CardType.SKIP. 1 cards remaining.
+Alex drew GREEN 3. 1 cards remaining.
+John drew GREEN 4. 1 cards remaining.
+Jesse drew BLUE 4. 2 cards remaining.
+Nat drew BLUE 1. 2 cards remaining.
+Alex drew RED 3. 2 cards remaining.
+John drew RED 0. 2 cards remaining.
+Jesse drew BLUE 2. 3 cards remaining.
+Nat drew BLUE 2. 3 cards remaining.
+Alex drew RED CardType.SKIP. 3 cards remaining.
+John drew BLUE 0. 3 cards remaining.
+Jesse drew RED 4. 4 cards remaining.
+Nat drew BLUE 4. 4 cards remaining.
+Alex drew BLUE CardType.SKIP. 4 cards remaining.
+John drew BLUE 1. 4 cards remaining.
+Jesse drew GREEN 2. 5 cards remaining.
+Nat drew GREEN CardType.SKIP. 5 cards remaining.
+Alex drew RED 0. 5 cards remaining.
+John drew RED 4. 5 cards remaining.
+
+Jesse played GREEN 2. 4 cards remaining.
+Nat played GREEN CardType.SKIP. 4 cards remaining.
+Alex played BLUE CardType.SKIP. 4 cards remaining.
+John played RED 0. 4 cards remaining.
+Jesse played BLUE 4. 3 cards remaining.
+Nat played BLUE 2. 3 cards remaining.
+Alex played RED 3. 3 cards remaining.
+Alex clogged the toilet.
+John played GREEN 4. 3 cards remaining.
+Jesse played BLUE 2. 2 cards remaining.
+Nat played BLUE 1. 2 cards remaining.
+Alex played BLUE 2. 9 cards remaining.
+Jesse drew RED 3. 3 cards remaining.
+Nat drew RED CardType.SKIP. 3 cards remaining.
+John drew GREEN 2. 4 cards remaining.
+Alex flushed the toilet.
+Alex played GREEN CardType.SKIP. 8 cards remaining.
+John played GREEN 2. 3 cards remaining.
+Jesse played RED 3. 2 cards remaining.
+Nat played GREEN CardType.SKIP. 2 cards remaining.
+Alex played BLUE 4. 7 cards remaining.
+John played BLUE 1. 2 cards remaining.
+Jesse played RED 4. 1 cards remaining.
+Jesse clogged the toilet.
+Nat played RED CardType.SKIP. 1 cards remaining.
+Alex played RED 3. 6 cards remaining.
+John played RED 4. 1 cards remaining.
+Jesse drew GREEN 3. 9 cards remaining.
+Nat drew RED 4. 2 cards remaining.
+Alex drew GREEN 0. 7 cards remaining.
+John flushed the toilet.
+John played BLUE 0. 0 cards remaining.
+John won the game.

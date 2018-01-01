@@ -1,0 +1,64 @@
+A new toilet was drawn: Toilet: RED 14.
+Jesse drew BLUE CardType.SKIP. 1 cards remaining.
+Nat drew BLUE 4. 1 cards remaining.
+Alex drew GREEN 1. 1 cards remaining.
+John drew GREEN 2. 1 cards remaining.
+Jesse drew RED 2. 2 cards remaining.
+Nat drew GREEN 4. 2 cards remaining.
+Alex drew RED 1. 2 cards remaining.
+John drew BLUE 4. 2 cards remaining.
+Jesse drew RED 4. 3 cards remaining.
+Nat drew RED 0. 3 cards remaining.
+Alex drew BLUE 3. 3 cards remaining.
+John drew RED 3. 3 cards remaining.
+Jesse drew GREEN 4. 4 cards remaining.
+Nat drew GREEN 3. 4 cards remaining.
+Alex drew RED 1. 4 cards remaining.
+John drew BLUE 2. 4 cards remaining.
+Jesse drew RED 4. 5 cards remaining.
+Nat drew BLUE 0. 5 cards remaining.
+Alex drew BLUE CardType.SKIP. 5 cards remaining.
+John drew RED 2. 5 cards remaining.
+
+Jesse played RED 4. 4 cards remaining.
+Nat played RED 0. 4 cards remaining.
+Alex played GREEN 1. 4 cards remaining.
+John played GREEN 2. 4 cards remaining.
+Jesse played RED 4. 3 cards remaining.
+Nat played GREEN 4. 3 cards remaining.
+Nat clogged the toilet.
+Alex played RED 1. 3 cards remaining.
+John played RED 2. 3 cards remaining.
+Jesse played RED 2. 2 cards remaining.
+Nat drew BLUE 2. 10 cards remaining.
+Alex drew GREEN 4. 4 cards remaining.
+John drew GREEN 2. 4 cards remaining.
+Jesse flushed the toilet.
+Jesse played GREEN 4. 1 cards remaining.
+Nat played GREEN 2. 9 cards remaining.
+Alex played GREEN 4. 3 cards remaining.
+Jesse drew RED 3. 2 cards remaining.
+Nat drew BLUE 4. 10 cards remaining.
+John drew BLUE 1. 5 cards remaining.
+Alex flushed the toilet.
+Alex played RED 1. 2 cards remaining.
+John played BLUE 2. 4 cards remaining.
+Jesse played RED 3. 1 cards remaining.
+Nat played BLUE 4. 9 cards remaining.
+Alex played BLUE CardType.SKIP. 1 cards remaining.
+John played BLUE 4. 3 cards remaining.
+Jesse drew BLUE 0. 2 cards remaining.
+Nat drew GREEN 4. 10 cards remaining.
+Alex drew BLUE 3. 2 cards remaining.
+John flushed the toilet.
+John played GREEN 2. 2 cards remaining.
+Jesse played BLUE CardType.SKIP. 1 cards remaining.
+Nat played GREEN 3. 9 cards remaining.
+Alex played BLUE 3. 1 cards remaining.
+John played BLUE 1. 1 cards remaining.
+Jesse played BLUE 0. 0 cards remaining.
+Nat drew BLUE 4. 10 cards remaining.
+Alex drew GREEN 0. 2 cards remaining.
+John drew RED 4. 2 cards remaining.
+Jesse flushed the toilet.
+Jesse won the game.

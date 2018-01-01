@@ -1,4 +1,4 @@
-from Logger import *
+from logger import *
 from enum import Enum, auto
 
 import datetime
@@ -104,6 +104,7 @@ class SimpleDeck:
             card = self.cardlist.pop(0)
             return card
         except IndexError:
+            print("No cards!")
             return None
 
     def remove(self, card):
@@ -158,6 +159,9 @@ class Deck(SimpleDeck):
         self.cardcount = [0 for _ in range(Card.TOTAL_CARDS)]
 
 
+    def size(self):
+        return sum(self.cardcount)
+
     def __iter__(self):
         return iter(self.cardlist)
     def __repr__(self):
@@ -203,24 +207,29 @@ class Game:
     POOP_REPEATS = 4 # Number of poop cards per number
     SPECIAL_REPEATS = 2
 
-    NUM_CARDS_START = 5 # Number of cards to start in a hand
+    NUM_CARDS_START = 9 # Number of cards to start in a hand
 
     NUM_CARDS_FLUSH = 3
 
-    def __init__(self, players):
+    def __init__(self, players, log_name=None):
         '''
         Game setup
         '''
         # Game Setup
         self.gamestate = GameState.ONGOING
         today = datetime.datetime.today()
-        self.logger = Logger("{:04}{:02}{:02} {:02}{:02}{:02}".format(today.year, today.month,
-            today.day, today.hour, today.minute, today.second))
 
         # Player Setup
         self.num_players = len(players)
         self.players = players
         self.turn = 0
+
+        # Logger setup
+
+        if not log_name:
+            log_name = "{:04}{:02}{:02} {:02}{:02}{:02}".format(today.year, today.month,
+                    today.day, today.hour, today.minute, today.second)
+        self.logger = Logger(log_name, self)
 
         # Pile Card Setup
         self.pile = Deck()
@@ -237,6 +246,7 @@ class Game:
         for _ in range(Game.NUM_CARDS_START):
             for player in self.players:
                 self.draw(player, self.deck)
+
         self.logger.add_blank()
 
     def current_player(self):
@@ -269,7 +279,12 @@ class Game:
 
     def draw_toilet(self):
         ''' Draws a new toilet '''
-        self.toilet = self.toilet_cards.draw()
+        try:
+            self.toilet = self.toilet_cards.draw()
+        except IndexError:
+            self.toilet_cards = self.initialize_toilet_deck()
+            self.toilet = self.toilet_cards.draw()
+
         self.logger.add_toilet(self.toilet)
         self.broadcast_all("A new toilet has been drawn: {}".format(self.toilet))
 
@@ -280,7 +295,12 @@ class Game:
         '''
         card = deck.draw()
         if card == None:
-            raise IndexError("There are no cards left!")
+            if len(self.trash.cardlist) > 0:
+                deck.add_cards(self.trash.cardlist)
+                card = deck.draw()
+                self.trash.clear()
+            else:
+                self.deck = self.initialize_poop_deck()
         player.deck.insert_card(card)
         self.logger.add_draw(player, card)
         self.broadcast(player, "{}, you have drawn {}".format(player.name, card))
@@ -304,7 +324,7 @@ class Game:
         self.logger.add_flush(player)
         self.broadcast_all("{} flushed the toilet.".format(player.name))
 
-        if len(player.deck.cardlist) == 0:
+        if player.deck.size() == 0:
             self.gamestate = GameState.FINISHED
             self.logger.add_win(player)
             return Game.WIN
@@ -333,20 +353,25 @@ class Game:
             self.broadcast_all("It was not {}'s turn.".format(player.name))
             return Game.INVALID
         if not player.deck.contains(card):
+            self.logger.add_custom("{} could not play {}".format(player.name, card))
             self.broadcast_all("{} could not play {}".format(player.name, card))
+            self.pass_turn()
             return Game.INVALID
+
+        # Grabbing information
+        old_state = self.get_state(player)
 
         # Playing the card into the pile
         player.deck.remove(card)
         self.pile.insert_card(card)
         self.pile_count += card.number
 
-        self.logger.add_move(player, card)
+        self.logger.add_move(player, card, old_state)
         self.broadcast_all("[{}] {} played {}. The pile is now at {}".format(self.toilet,
             player.name, card, self.pile_count))
 
         # Game Logic and Return Values
-        if len(self.pile.cardlist) >= Game.NUM_CARDS_FLUSH:
+        if self.pile.size() >= Game.NUM_CARDS_FLUSH:
             top = [card.color for card in self.pile.cardlist[:Game.NUM_CARDS_FLUSH]]
             if top.count(top[0]) == Game.NUM_CARDS_FLUSH:
                 return self.flush(player)
@@ -355,7 +380,7 @@ class Game:
             return self.clog(player)
 
 
-        if len(player.deck.cardlist) == 0:
+        if player.deck.size() == 0:
             # Game win
             self.gamestate = GameState.FINISHED
             self.logger.add_win(player)
@@ -366,7 +391,8 @@ class Game:
 
     def get_state(self, player):
         ''' Gets the current state of the game from a player's perspective '''
-        return [self.toilet.number] + [self.pile_count] + player.deck.cardcount
+        lowest = min([p.deck.size() for p in self.players if p != player])
+        return [self.toilet.number] + [self.pile_count] + [lowest] + player.deck.cardcount
 
     def broadcast(self, player, msg):
         ''' Broadcasts a message to a player '''

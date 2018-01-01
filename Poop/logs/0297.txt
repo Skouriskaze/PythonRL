@@ -1,0 +1,53 @@
+A new toilet was drawn: Toilet: BLUE 8.
+Jesse drew GREEN 0. 1 cards remaining.
+Nat drew GREEN 4. 1 cards remaining.
+Alex drew RED 4. 1 cards remaining.
+John drew BLUE 3. 1 cards remaining.
+Jesse drew RED 2. 2 cards remaining.
+Nat drew GREEN 1. 2 cards remaining.
+Alex drew BLUE 0. 2 cards remaining.
+John drew GREEN 4. 2 cards remaining.
+Jesse drew GREEN 3. 3 cards remaining.
+Nat drew GREEN 4. 3 cards remaining.
+Alex drew GREEN CardType.SKIP. 3 cards remaining.
+John drew RED 0. 3 cards remaining.
+Jesse drew GREEN 3. 4 cards remaining.
+Nat drew RED 2. 4 cards remaining.
+Alex drew GREEN 1. 4 cards remaining.
+John drew GREEN 2. 4 cards remaining.
+Jesse drew BLUE 1. 5 cards remaining.
+Nat drew GREEN 1. 5 cards remaining.
+Alex drew RED 0. 5 cards remaining.
+John drew RED 1. 5 cards remaining.
+
+Jesse played GREEN 3. 4 cards remaining.
+Nat played RED 2. 4 cards remaining.
+Alex played GREEN CardType.SKIP. 4 cards remaining.
+John played GREEN 4. 4 cards remaining.
+John clogged the toilet.
+Jesse played RED 2. 3 cards remaining.
+Nat played GREEN 4. 3 cards remaining.
+Alex played GREEN 1. 3 cards remaining.
+John played GREEN 4. 7 cards remaining.
+Jesse drew BLUE 4. 4 cards remaining.
+Nat drew GREEN 2. 4 cards remaining.
+Alex drew GREEN 2. 4 cards remaining.
+John flushed the toilet.
+John played GREEN CardType.SKIP. 6 cards remaining.
+Jesse played BLUE 1. 3 cards remaining.
+Nat played GREEN 4. 3 cards remaining.
+Alex played GREEN 2. 3 cards remaining.
+John played RED 2. 5 cards remaining.
+Jesse played BLUE 4. 2 cards remaining.
+Jesse clogged the toilet.
+Nat played GREEN 2. 2 cards remaining.
+Alex played BLUE 0. 2 cards remaining.
+John played BLUE 3. 4 cards remaining.
+Jesse played RED 2. 7 cards remaining.
+Nat played GREEN 1. 1 cards remaining.
+Alex played RED 0. 1 cards remaining.
+John played GREEN 2. 3 cards remaining.
+Jesse played BLUE 4. 6 cards remaining.
+Jesse clogged the toilet.
+Nat played GREEN 1. 0 cards remaining.
+Nat won the game.
