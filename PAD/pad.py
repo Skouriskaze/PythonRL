@@ -44,7 +44,11 @@ class Board:
 
     # -------------------- MOVEMENT --------------------
     def get_piece(self, loc):
+        # TODO: Consider throwing exceptions
         x, y = loc
+        if x < 0 or y < 0 or x >= self.width or y >= self.height:
+            return None
+
         return self.board[y][x]
 
     def set_piece(self, loc, value):
@@ -79,13 +83,45 @@ class Board:
 
 
     def clear_combos(self):
-        visited = []
-        hor_match = self._check_horizontal((0, 0), visited)
+        component = 1
+        grid = [[0 for _ in self.width] for _ in self.height]
+
+        for j in range(self.height):
+            for i in range(self.width):
+                comp = max(grid[j][i], component)
+                if comp == 0:
+                    component += 1
+                self._horizontal_combo((i, j), grid, comp)
+                self._vertical_combo((i, j), grid, comp)
+
+        # visited = []
+        # hor_match = self._check_horizontal((0, 0), visited)
         
-        for orb in hor_match:
-            self.set_piece(orb, None)
+        # for orb in hor_match:
+            # self.set_piece(orb, None)
 
         self._drop_board()
+
+
+    def _horizontal_combo(self, coord, grid, comp):
+        x, y = coord
+        length = 0
+        color = self.get_piece(coord)
+        while self.get_piece((right, y)) == color:
+            right += 1
+
+        for i in range(x, right):
+            grid[y][i] = comp
+
+    def _vertical_combo(self, coord, grid, comp):
+        x, y = coord
+        bottom = y
+        color = self.get_piece(coord)
+        while bottom < self.height and color == self.get_piece((x, bottom))::
+            bottom += 1
+
+        for i in range(y, bottom):
+            grid[i][x] = comp
 
 
 
